@@ -6,19 +6,29 @@
 //  Ray-tracing stuff //
 ////////////////////////
 double RayGroup::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
+  ray = this->getInverseMatrix() * ray;
+  ray.direction /= ray.direction.length();
   for(int i = 0; i < this->sNum; i++)
-    {
+    {      
+      double originalMx = mx;
       mx = this->shapes[i]->intersect(ray, iInfo, mx);
+      if(originalMx != mx)
+	{	 
+	    iInfo.normal = this->getMatrix().multNormal(iInfo.normal);
+	    iInfo.normal /= iInfo.normal.length();
+	    iInfo.iCoordinate = this->getMatrix().multPosition(iInfo.iCoordinate);
+       	}
     }
+  
   return mx;
 }
 
 BoundingBox3D RayGroup::setBoundingBox(void){
-	return bBox;
+  
 }
-
 int StaticRayGroup::set(void){
-	return 1;
+  this->inverseTransform = this->getMatrix().invert();
+  return 1;
 }
 //////////////////
 // OpenGL stuff //
