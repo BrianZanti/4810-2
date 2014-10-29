@@ -5,9 +5,12 @@
 #ray_file sphere.ray
 #ray_file square.ray
 #light_num 1
-#light_dir
-	 1.0  1.0  1.0
+#light_spot
+	 1.0  1.0  1.0	 
+	 10.0 10.0 0.0
 	 -1.0 -1.0 0.0
+	 1.0 0.0 0.0	
+	 30 2
 #group_begin
 	0.5 0.0 0.0 0.0
 	0.0 1.0 0.0 2.5

@@ -2,6 +2,7 @@
 #include <GL/glut.h>
 #include <math.h>
 #include <algorithm>
+#include <iostream>
 using namespace std;
 
 ///////////////////////
@@ -9,6 +10,10 @@ using namespace std;
 ///////////////////////
 
 Point3D RayScene::Reflect(Point3D v,Point3D n){
+  if( v.dot(n) <= 0 )
+    {
+      return Point3D(0,0,0);
+    }
   return (n * (v.dot(n)) * 2 - v) / (n * (v.dot(n)) * 2 - v).length();
 }
 
@@ -26,6 +31,10 @@ Ray3D RayScene::GetRay(RayCamera* camera,int i,int j,int width,int height){
   p += (camera->up) * verticalDist;
   p += (camera->right) * horizontalDist;
   ray->direction = p / p.length();
+  if(i == 80 && j == 235)
+    {
+      cout << "true" << endl;
+    }
   return *ray;
 }
 
@@ -36,23 +45,51 @@ Point3D RayScene::GetColor(Ray3D ray,int rDepth,Point3D cLimit){
     {
       mx = this->group->shapes[i]->intersect(ray, iInfo, mx );
     }
-  Point3D* color = new Point3D();
+  Point3D* color = new Point3D(0,0,0);
   if(mx > 0)
-    {
-      for(int i = 0; i < 3; i++)
-	{
-	  color->p[i] = 0;
-	}
+    {      
+      RayIntersectionInfo permanentInfo = iInfo;
       *color += this->ambient * iInfo.material->ambient + iInfo.material->emissive;
       for(int i = 0; i < this->lightNum; i++)
-	{
-	  int x = 0;
-	  int& isectCount = x;
-	  Point3D lightContributions = (this->lights[i]->getDiffuse(this->camera->position,iInfo) + this->lights[i]->getSpecular(this->camera->position,iInfo))*1;
-	  int s = this->lights[i]->isInShadow(iInfo,this->group,isectCount);
-	  *color += lightContributions * s;
+	{	
+	  Point3D lightContributions = (this->lights[i]->getDiffuse(this->camera->position,iInfo) + this->lights[i]->getSpecular(this->camera->position,iInfo));
+	  Point3D t = this->lights[i]->transparency(iInfo,this->group,cLimit);
+	  *color += lightContributions * t;
 	}
-      
+      /*************Reflection*****************/     
+      if(cLimit.p[0] < 1 && cLimit.p[1] < 1 && cLimit.p[2] < 1 && rDepth > 0)
+	{	  
+	  Ray3D reflect;	  
+	  reflect.direction = Reflect(-ray.direction, permanentInfo.normal);
+	  if(reflect.direction.length()  != 0)
+	    {	     	    
+	      reflect.position = permanentInfo.iCoordinate + reflect.direction * 0.00001;
+	      rDepth--;
+
+	      Point3D tempColor = GetColor(reflect, rDepth, cLimit/permanentInfo.material->specular) * permanentInfo.material->specular;
+
+	      if(tempColor.p[0] != this->background.p[0] && tempColor.p[1] != this->background.p[1] && tempColor.p[2] != this->background.p[2])
+		{
+		  *color += tempColor;
+		}
+	    }		    
+	}	
+      /*************Refraction****************/
+      if(cLimit.p[0] < 1 && cLimit.p[1] && cLimit.p[2] < 1 && rDepth > 0)
+	{
+	  Ray3D refract;
+	  refract.position = permanentInfo.iCoordinate + ray.direction * 0.00001;
+	  refract.direction = ray.direction;
+	  rDepth--;
+
+	  Point3D tempColor = GetColor(refract, rDepth, cLimit/permanentInfo.material->transparent) * permanentInfo.material->transparent;
+
+	  if(tempColor.p[0] != this->background.p[0] && tempColor.p[1] != this->background.p[1] && tempColor.p[2] != this->background.p[2])
+	    {
+	      *color += tempColor;
+	    }
+	}
+      /***************************************/
       for(int i = 0; i < 3; i++)
 	{
 	  color->p[i] = min(1.0, color->p[i]);
@@ -61,7 +98,7 @@ Point3D RayScene::GetColor(Ray3D ray,int rDepth,Point3D cLimit){
     }
   else
     {
-      *color = this->background;
+      return this->background;
     }
   return *color;
     

@@ -49,10 +49,7 @@ int RaySpotLight::isInShadow(RayIntersectionInfo& iInfo,RayShape* shape,int& ise
     Ray3D* shadowRay = new Ray3D();
   shadowRay->direction = (this->location - iInfo.iCoordinate) / (this->location - iInfo.iCoordinate).length();
   shadowRay->position = iInfo.iCoordinate;
-  for(int i = 0; i < 3; i++)
-    {
-      shadowRay->position += (shadowRay->direction * 0.00001);
-    }
+  shadowRay->position += (shadowRay->direction * 0.00001);
   double lightDist = (this->location - iInfo.iCoordinate).length();
   double mx = shape->intersect(*shadowRay, iInfo, lightDist);
   if(mx < lightDist)
@@ -62,7 +59,14 @@ int RaySpotLight::isInShadow(RayIntersectionInfo& iInfo,RayShape* shape,int& ise
   return 1;
 }
 Point3D RaySpotLight::transparency(RayIntersectionInfo& iInfo,RayShape* shape,Point3D cLimit){
-	return Point3D(1,1,1);
+  int y = 0;
+  int& isectCount = y;
+  int x = isInShadow(iInfo, shape, isectCount);
+  if(x == 0)
+    {
+      return iInfo.material->transparent;
+    }
+  return Point3D(1,1,1);
 }
 
 //////////////////
