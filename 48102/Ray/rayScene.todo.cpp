@@ -13,7 +13,7 @@ Point3D RayScene::Reflect(Point3D v,Point3D n){
 }
 
 int RayScene::Refract(Point3D v,Point3D n,double ir,Point3D& refract){
-	return 0;
+  return 0;
 }
 
 Ray3D RayScene::GetRay(RayCamera* camera,int i,int j,int width,int height){
@@ -46,10 +46,10 @@ Point3D RayScene::GetColor(Ray3D ray,int rDepth,Point3D cLimit){
       *color += this->ambient * iInfo.material->ambient + iInfo.material->emissive;
       for(int i = 0; i < this->lightNum; i++)
 	{
-	  int x =0;
+	  int x = 0;
 	  int& isectCount = x;
 	  Point3D lightContributions = (this->lights[i]->getDiffuse(this->camera->position,iInfo) + this->lights[i]->getSpecular(this->camera->position,iInfo))*1;
-	  int s =this->lights[i]->isInShadow(iInfo,this->group,isectCount);
+	  int s = this->lights[i]->isInShadow(iInfo,this->group,isectCount);
 	  *color += lightContributions * s;
 	}
       

@@ -8,19 +8,26 @@
 double RayGroup::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
   ray = this->getInverseMatrix() * ray;
   ray.direction /= ray.direction.length();
+  double tempMx = -1;
+  RayIntersectionInfo tempInfo;
   for(int i = 0; i < this->sNum; i++)
-    {      
-      double originalMx = mx;
-      mx = this->shapes[i]->intersect(ray, iInfo, mx);
-      if(originalMx != mx)
-	{	 
-	    iInfo.normal = this->getMatrix().multNormal(iInfo.normal);
-	    iInfo.normal /= iInfo.normal.length();
-	    iInfo.iCoordinate = this->getMatrix().multPosition(iInfo.iCoordinate);
-       	}
+    {            
+      tempMx = this->shapes[i]->intersect(ray, tempInfo, tempMx);
     }
-  
+  if(tempMx > 0)
+    {
+      tempMx = this->getMatrix().multPosition(tempInfo.iCoordinate - ray.position).length();
+      if(tempMx < mx || mx < 0)
+	{
+	  mx = tempMx;
+	  iInfo = tempInfo;
+	  iInfo.normal = this->getMatrix().multNormal(iInfo.normal);
+	  iInfo.normal /= iInfo.normal.length();
+	  iInfo.iCoordinate = this->getMatrix().multPosition(iInfo.iCoordinate);
+	}
+    }
   return mx;
+  //return (iInfo.iCoordinate - globalRayPosition).length();
 }
 
 BoundingBox3D RayGroup::setBoundingBox(void){
