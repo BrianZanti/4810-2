@@ -767,11 +767,8 @@ Point3D Matrix4D::multPosition(const Point3D& p) const {
 	double t=0;
 	int i,j;
 	for(i=0;i<3;i++){
-	  q[i]=this->m[3][i];
-		
-	  for(j=0;j<3;j++){
-	    q[i]+=this->m[j][i]*p.p[j];
-	  }
+		q[i]=this->m[3][i];
+		for(j=0;j<3;j++){q[i]+=this->m[j][i]*p.p[j];}
 	}
 	t=m[0][3]+m[1][3]+m[2][3]+m[3][3];
 	return q/t;
@@ -828,7 +825,7 @@ double Matrix4D::SquareL2Difference(const Matrix4D& m1,const Matrix4D& m2){
 		for(int j=0;j<4;j++){
 			double temp=m1.m[i][j]-m2.m[i][j];
 			n+=temp*temp;
-		}
+		}/
 	}
 	return n;
 }

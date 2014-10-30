@@ -44,8 +44,11 @@ double RayTriangle::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
     }
   return mx;
 }
+
 BoundingBox3D RayTriangle::setBoundingBox(void){
-	return bBox;
+  Point3D vertices[] = {this->v[0]->position, this->v[1]->position, this->v[2]->position};
+  return BoundingBox3D(vertices,3);
+  
 }
 
 //////////////////

@@ -45,12 +45,16 @@ Ray3D RayScene::GetRay(RayCamera* camera,int i,int j,int width,int height){
   ray->direction = p / p.length();
   if(i == 250 && j == 355)
     {
-      cout << "true" << endl;
+      cout << "true" << endl;      
     }
   return *ray;
 }
 
 Point3D RayScene::GetColor(Ray3D ray,int rDepth,Point3D cLimit){
+  if(rDepth == 3)
+    {
+      this->group->bBox.intersect(ray);
+    }
   double mx = -1;
   RayIntersectionInfo iInfo;
   for(int i = 0; i < this->group->sNum; i++)

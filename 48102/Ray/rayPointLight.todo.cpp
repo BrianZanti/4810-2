@@ -52,7 +52,14 @@ int RayPointLight::isInShadow(RayIntersectionInfo& iInfo,RayShape* shape,int& is
   return 1;
 }
 Point3D RayPointLight::transparency(RayIntersectionInfo& iInfo,RayShape* shape,Point3D cLimit){
-	return Point3D(1,1,1);
+  int y = 0;
+  int& isectCount = y;
+  int x = isInShadow(iInfo, shape, isectCount);
+  if(x == 0)
+    {
+      return iInfo.material->transparent;
+    }
+  return Point3D(1,1,1);
 }
 
 

@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <GL/glut.h>
 #include "rayGroup.h"
-
+#include <iostream>
+using namespace std;
 ////////////////////////
 //  Ray-tracing stuff //
 ////////////////////////
@@ -10,9 +11,15 @@ double RayGroup::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
   ray.direction /= ray.direction.length();
   double tempMx = -1;
   RayIntersectionInfo tempInfo;
-  for(int i = 0; i < this->sNum; i++)
-    {            
-      tempMx = this->shapes[i]->intersect(ray, tempInfo, tempMx);
+  if(this->bBox.intersect(ray))
+    {
+      for(int i = 0; i < this->sNum; i++)
+	{            
+	  if(shapes[i]->bBox.intersect(ray))
+	    {
+	      tempMx = this->shapes[i]->intersect(ray, tempInfo, tempMx);
+	    }
+	}
     }
   if(tempMx > 0)
     {
@@ -27,12 +34,19 @@ double RayGroup::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 	}
     }
   return mx;
-  //return (iInfo.iCoordinate - globalRayPosition).length();
 }
 
 BoundingBox3D RayGroup::setBoundingBox(void){
-  
+  Point3D bBoxVertices[sNum*2];
+  for(int i = 0; i < sNum; i++)
+    {
+      this->shapes[i]->bBox = this->shapes[i]->setBoundingBox();
+      bBoxVertices[2*i] = this->shapes[i]->bBox.p[0];
+      bBoxVertices[2*i+1] = this->shapes[i]->bBox.p[1];
+    }
+  this->bBox = BoundingBox3D(bBoxVertices,sNum*2);
 }
+
 int StaticRayGroup::set(void){
   this->inverseTransform = this->getMatrix().invert();
   return 1;

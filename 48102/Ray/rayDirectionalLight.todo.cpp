@@ -38,7 +38,14 @@ int RayDirectionalLight::isInShadow(RayIntersectionInfo& iInfo,RayShape* shape,i
   return 1;
 }
 Point3D RayDirectionalLight::transparency(RayIntersectionInfo& iInfo,RayShape* shape,Point3D cLimit){
-	return Point3D(1,1,1);
+  int y = 0;
+  int& isectCount = y;
+  int x = isInShadow(iInfo, shape, isectCount);
+  if(x == 0)
+    {
+      return iInfo.material->transparent;
+    }
+  return Point3D(1,1,1);
 }
 
 //////////////////
