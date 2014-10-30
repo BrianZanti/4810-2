@@ -18,7 +18,8 @@ Point3D RayScene::Reflect(Point3D v,Point3D n){
 }
 
 int RayScene::Refract(Point3D v,Point3D n,double ir,Point3D& refract){
-  return 0;
+  refract = v;
+  return 1;
 }
 
 Ray3D RayScene::GetRay(RayCamera* camera,int i,int j,int width,int height){
@@ -31,7 +32,7 @@ Ray3D RayScene::GetRay(RayCamera* camera,int i,int j,int width,int height){
   p += (camera->up) * verticalDist;
   p += (camera->right) * horizontalDist;
   ray->direction = p / p.length();
-  if(i == 80 && j == 235)
+  if(i == 250 && j == 355)
     {
       cout << "true" << endl;
     }
@@ -54,6 +55,7 @@ Point3D RayScene::GetColor(Ray3D ray,int rDepth,Point3D cLimit){
 	{	
 	  Point3D lightContributions = (this->lights[i]->getDiffuse(this->camera->position,iInfo) + this->lights[i]->getSpecular(this->camera->position,iInfo));
 	  Point3D t = this->lights[i]->transparency(iInfo,this->group,cLimit);
+	  
 	  *color += lightContributions * t;
 	}
       /*************Reflection*****************/     
@@ -78,10 +80,17 @@ Point3D RayScene::GetColor(Ray3D ray,int rDepth,Point3D cLimit){
       if(cLimit.p[0] < 1 && cLimit.p[1] && cLimit.p[2] < 1 && rDepth > 0)
 	{
 	  Ray3D refract;
-	  refract.position = permanentInfo.iCoordinate + ray.direction * 0.00001;
+	  refract.position = permanentInfo.iCoordinate;
+	  /*	  Point3D* direction = new Point3D();
+	  Refract(-ray.direction, permanentInfo.normal, permanentInfo.material->refind, *direction);
+	  refract.direction = *direction;
+	  refract.position += refract.direction * 0.00001;
+	  rDepth--;*/
+	  
+	  refract.position = permanentInfo.iCoordinate;
 	  refract.direction = ray.direction;
+	  refract.position += refract.direction * 0.00001 ;
 	  rDepth--;
-
 	  Point3D tempColor = GetColor(refract, rDepth, cLimit/permanentInfo.material->transparent) * permanentInfo.material->transparent;
 
 	  if(tempColor.p[0] != this->background.p[0] && tempColor.p[1] != this->background.p[1] && tempColor.p[2] != this->background.p[2])
