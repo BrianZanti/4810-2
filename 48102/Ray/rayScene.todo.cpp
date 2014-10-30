@@ -18,7 +18,18 @@ Point3D RayScene::Reflect(Point3D v,Point3D n){
 }
 
 int RayScene::Refract(Point3D v,Point3D n,double ir,Point3D& refract){
-  refract = v;
+  if(v.dot(n) < 0)
+    {
+      n *= -1;
+    }
+  double thetai = acos(v.dot(n));
+  double thetar = asin(sin(thetai)/ir);
+  if(thetar > thetai)
+    {
+      return 0;
+    }
+  refract = n * (cos(thetai)/ir - cos(thetar)) - v/ir;
+  refract /= refract.length();
   return 1;
 }
 
@@ -79,23 +90,20 @@ Point3D RayScene::GetColor(Ray3D ray,int rDepth,Point3D cLimit){
       /*************Refraction****************/
       if(cLimit.p[0] < 1 && cLimit.p[1] && cLimit.p[2] < 1 && rDepth > 0)
 	{
-	  Ray3D refract;
-	  refract.position = permanentInfo.iCoordinate;
-	  /*	  Point3D* direction = new Point3D();
-	  Refract(-ray.direction, permanentInfo.normal, permanentInfo.material->refind, *direction);
-	  refract.direction = *direction;
-	  refract.position += refract.direction * 0.00001;
-	  rDepth--;*/
-	  
-	  refract.position = permanentInfo.iCoordinate;
-	  refract.direction = ray.direction;
-	  refract.position += refract.direction * 0.00001 ;
-	  rDepth--;
-	  Point3D tempColor = GetColor(refract, rDepth, cLimit/permanentInfo.material->transparent) * permanentInfo.material->transparent;
-
-	  if(tempColor.p[0] != this->background.p[0] && tempColor.p[1] != this->background.p[1] && tempColor.p[2] != this->background.p[2])
+	  Ray3D refract;	  
+	  refract.position = permanentInfo.iCoordinate;	  	  
+	  Point3D* direction = new Point3D();
+	  if(Refract(-ray.direction, permanentInfo.normal,permanentInfo.material->refind, *direction) && permanentInfo.material->transparent.length() > 0)
 	    {
-	      *color += tempColor;
+	      refract.direction = *direction;
+	      refract.position += refract.direction * 0.00001;
+	      rDepth--;
+	      Point3D tempColor = GetColor(refract, rDepth, cLimit/permanentInfo.material->transparent) * permanentInfo.material->transparent;
+
+	      if(tempColor.p[0] != this->background.p[0] && tempColor.p[1] != this->background.p[1] && tempColor.p[2] != this->background.p[2])
+		{
+		  *color += tempColor;
+		}
 	    }
 	}
       /***************************************/
