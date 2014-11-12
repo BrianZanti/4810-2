@@ -25,10 +25,8 @@ int RayDirectionalLight::isInShadow(RayIntersectionInfo& iInfo,RayShape* shape,i
     Ray3D* shadowRay = new Ray3D();
   shadowRay->direction = this->direction * -1;
   shadowRay->position = iInfo.iCoordinate;
-  for(int i = 0; i < 3; i++)
-    {
-      shadowRay->position += (shadowRay->direction * 0.00001);
-    }
+  shadowRay->position += (shadowRay->direction * 0.00001);
+   
   double lightDist = -1;
   double mx = shape->intersect(*shadowRay, iInfo, lightDist);
   if(mx > 0)

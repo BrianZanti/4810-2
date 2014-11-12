@@ -36,16 +36,14 @@ Point3D RayPointLight::getSpecular(Point3D cameraPosition,RayIntersectionInfo& i
   
 }
 int RayPointLight::isInShadow(RayIntersectionInfo& iInfo,RayShape* shape,int& isectCount){
-    Ray3D* shadowRay = new Ray3D();
-  shadowRay->direction = (this->location - iInfo.iCoordinate) / (this->location - iInfo.iCoordinate).length();
+  Ray3D* shadowRay = new Ray3D();
+  shadowRay->direction = (this->location - iInfo.iCoordinate);
+  shadowRay->direction /= shadowRay->direction.length();
   shadowRay->position = iInfo.iCoordinate;
-  for(int i = 0; i < 3; i++)
-    {
-      shadowRay->position += (shadowRay->direction * 0.00001);
-    }
   double lightDist = (this->location - iInfo.iCoordinate).length();
-  double mx = shape->intersect(*shadowRay, iInfo, lightDist);
-  if(mx < lightDist)
+  shadowRay->position += (shadowRay->direction * 0.0001);  
+  double mx = shape->intersect(*shadowRay, iInfo, -1);
+  if(mx < lightDist && mx > 0)
     {
       return 0;
     }

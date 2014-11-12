@@ -844,7 +844,8 @@ int RayScene::RayTrace(const int& width,const int& height,const int& rLimit,cons
 			c=GetColor(ray,rLimit,Point3D(cLimit,cLimit,cLimit));
 			p.r=(int)(c[0]*255);
 			p.g=(int)(c[1]*255);
-			p.b=(int)(c[2]*255);		  		       		 
+			p.b=(int)(c[2]*255);		  		       		
+		       
 			img(i,j) = p;
 		}
 	}

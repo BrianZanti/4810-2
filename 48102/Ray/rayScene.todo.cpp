@@ -43,18 +43,10 @@ Ray3D RayScene::GetRay(RayCamera* camera,int i,int j,int width,int height){
   p += (camera->up) * verticalDist;
   p += (camera->right) * horizontalDist;
   ray->direction = p / p.length();
-  if(i == 250 && j == 355)
-    {
-      cout << "true" << endl;      
-    }
   return *ray;
 }
 
 Point3D RayScene::GetColor(Ray3D ray,int rDepth,Point3D cLimit){
-  if(rDepth == 3)
-    {
-      this->group->bBox.intersect(ray);
-    }
   double mx = -1;
   RayIntersectionInfo iInfo;
   for(int i = 0; i < this->group->sNum; i++)
@@ -68,10 +60,9 @@ Point3D RayScene::GetColor(Ray3D ray,int rDepth,Point3D cLimit){
       *color += this->ambient * iInfo.material->ambient + iInfo.material->emissive;
       for(int i = 0; i < this->lightNum; i++)
 	{	
-	  Point3D lightContributions = (this->lights[i]->getDiffuse(this->camera->position,iInfo) + this->lights[i]->getSpecular(this->camera->position,iInfo));
-	  Point3D t = this->lights[i]->transparency(iInfo,this->group,cLimit);
-	  
-	  *color += lightContributions * t;
+	  Point3D lightContributions = (this->lights[i]->getDiffuse(this->camera->position,iInfo) + this->lights[i]->getSpecular(this->camera->position,iInfo));	  
+	  Point3D t = this->lights[i]->transparency(iInfo,this->group,cLimit);  
+	  *color += lightContributions*t ;
 	}
       /*************Reflection*****************/     
       if(cLimit.p[0] < 1 && cLimit.p[1] < 1 && cLimit.p[2] < 1 && rDepth > 0)

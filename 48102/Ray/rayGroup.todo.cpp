@@ -5,35 +5,48 @@
 using namespace std;
 ////////////////////////
 //  Ray-tracing stuff //
-////////////////////////
+/////////////////////////
 double RayGroup::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
+  double originalMx = mx;
   ray = this->getInverseMatrix() * ray;
   ray.direction /= ray.direction.length();
-  double tempMx = -1;
-  RayIntersectionInfo tempInfo;
-  if(this->bBox.intersect(ray))
+  if(mx > 0)
     {
+      mx = this->getInverseMatrix().multPosition(iInfo.iCoordinate - ray.position).length();
+    }
+  RayIntersectionInfo tempInfo;
+  double groupMx = this->bBox.intersect(ray);
+  if(groupMx < mx || (mx < 0 && groupMx > 0))
+     {      
+      int shapeHits = 0;
       for(int i = 0; i < this->sNum; i++)
-	{            
-	  if(shapes[i]->bBox.intersect(ray))
+	{            	  	  
+	  double shapeMx = shapes[i]->bBox.intersect(ray);
+	  if(shapeMx > 0)
 	    {
-	      tempMx = this->shapes[i]->intersect(ray, tempInfo, tempMx);
+	      this->hits[shapeHits].shape = this->shapes[i];
+	      this->hits[shapeHits].t = shapeMx;	 
+	      shapeHits++;
 	    }
 	}
-    }
-  if(tempMx > 0)
-    {
-      tempMx = this->getMatrix().multPosition(tempInfo.iCoordinate - ray.position).length();
-      if(tempMx < mx || mx < 0)
+      qsort(hits, shapeHits, sizeof(RayShapeHit),RayShapeHit::Compare);
+      double localMx = -1;
+      for(int i = 0; i < shapeHits; i++)
 	{
-	  mx = tempMx;
-	  iInfo = tempInfo;
-	  iInfo.normal = this->getMatrix().multNormal(iInfo.normal);
-	  iInfo.normal /= iInfo.normal.length();
-	  iInfo.iCoordinate = this->getMatrix().multPosition(iInfo.iCoordinate);
-	}
+	  localMx = this->hits[i].shape->intersect(ray, tempInfo, localMx);
+	  
+	  if(localMx < mx || (localMx > 0 && mx < 0))
+	    {	  
+	      mx = this->getMatrix().multPosition(tempInfo.iCoordinate - ray.position).length();		  
+	      iInfo = tempInfo;
+	      iInfo.normal = this->getMatrix().multNormal(iInfo.normal);
+	      iInfo.normal /= iInfo.normal.length();
+	      iInfo.iCoordinate = this->getMatrix().multPosition(iInfo.iCoordinate);	    
+	      return mx;
+	    }
+	}      
     }
-  return mx;
+  return originalMx;
 }
 
 BoundingBox3D RayGroup::setBoundingBox(void){
@@ -44,7 +57,10 @@ BoundingBox3D RayGroup::setBoundingBox(void){
       bBoxVertices[2*i] = this->shapes[i]->bBox.p[0];
       bBoxVertices[2*i+1] = this->shapes[i]->bBox.p[1];
     }
-  this->bBox = BoundingBox3D(bBoxVertices,sNum*2);
+    BoundingBox3D groupBox = BoundingBox3D(bBoxVertices,sNum*2);
+
+  this->bBox = groupBox;
+  return this->bBox;
 }
 
 int StaticRayGroup::set(void){
