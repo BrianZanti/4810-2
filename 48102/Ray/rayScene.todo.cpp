@@ -120,6 +120,7 @@ Point3D RayScene::GetColor(Ray3D ray,int rDepth,Point3D cLimit){
 // OpenGL stuff //
 //////////////////
 void RayMaterial::drawOpenGL(void){
+  //  glMaterialfv(GL_FRONT_AND_BACK, Gl_AMBIENT, 
 }
 void RayTexture::setUpOpenGL(void){
 }

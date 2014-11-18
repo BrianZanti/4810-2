@@ -30,14 +30,17 @@ double RaySphere::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
   return mx;
 }
 BoundingBox3D RaySphere::setBoundingBox(void){
-  Point3D p1 = Point3D(this->center[0]+this->radius, this->center[1]+this->radius, this->center[2]+this->radius);
-  Point3D p2 = Point3D(this->center[0]-this->radius, this->center[1]-this->radius, this->center[2]-this->radius);
-  return BoundingBox3D(p1,p2);
+  Point3D p=Point3D(radius,radius,radius);
+  bBox=BoundingBox3D(center+p,center-p);
+  return bBox;
 }
 
 //////////////////
 // OpenGL stuff //
 //////////////////
 int RaySphere::drawOpenGL(int materialIndex){
-	return -1;
+  glColor3f(1.0,1.0,1.0);
+  glTranslatef(this->center.p[0],this->center.p[1],this->center.p[2]);
+  gluSphere(gluNewQuadric(),this->radius,this->openGLComplexity,openGLComplexity);
+  return -1;
 }

@@ -46,8 +46,16 @@ double RayTriangle::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 }
 
 BoundingBox3D RayTriangle::setBoundingBox(void){
-  Point3D vertices[] = {this->v[0]->position, this->v[1]->position, this->v[2]->position};
-  return BoundingBox3D(vertices,3);
+  Point3D pList[3];
+  pList[0]=v[0]->position;
+  pList[1]=v[1]->position;
+  pList[2]=v[2]->position;
+  bBox=BoundingBox3D(pList,3);
+  for(int i=0;i<3;i++){
+    bBox.p[0][i]-=RAYEPS;
+    bBox.p[1][i]+=RAYEPS;
+  }
+  return bBox;
   
 }
 
@@ -55,5 +63,19 @@ BoundingBox3D RayTriangle::setBoundingBox(void){
 // OpenGL stuff //
 //////////////////
 int RayTriangle::drawOpenGL(int materialIndex){
-	return -1;
+  glBegin(GL_TRIANGLES);
+  Point3D normal = this->v[0]->normal;
+  Point3D position = this->v[0]->position;
+  glNormal3f(normal.p[0],normal.p[1],normal.p[2]);
+  glVertex3f(position.p[0],position.p[1],position.p[2]);
+  normal = this->v[1]->normal;
+  position = this->v[1]->position;
+  glNormal3f(normal.p[0],normal.p[1],normal.p[2]);
+  glVertex3f(position.p[0],position.p[1],position.p[2]);
+  normal = this->v[2]->normal;
+  position = this->v[2]->position;
+  glNormal3f(normal.p[0],normal.p[1],normal.p[2]);
+  glVertex3f(position.p[0],position.p[1],position.p[2]);
+  glEnd();
+  return -1;
 }

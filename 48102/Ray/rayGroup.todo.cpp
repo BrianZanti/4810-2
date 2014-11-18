@@ -50,17 +50,19 @@ double RayGroup::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 }
 
 BoundingBox3D RayGroup::setBoundingBox(void){
-  Point3D bBoxVertices[sNum*2];
-  for(int i = 0; i < sNum; i++)
-    {
-      this->shapes[i]->bBox = this->shapes[i]->setBoundingBox();
-      bBoxVertices[2*i] = this->shapes[i]->bBox.p[0];
-      bBoxVertices[2*i+1] = this->shapes[i]->bBox.p[1];
-    }
-    BoundingBox3D groupBox = BoundingBox3D(bBoxVertices,sNum*2);
+  Point3D* pList;
+  BoundingBox3D tBBox;
+  pList=new Point3D[sNum*2];
+  for(int i=0;i<sNum;i++){
+    tBBox=shapes[i]->setBoundingBox();
+    pList[2*i  ]=tBBox.p[0];
+    pList[2*i+1]=tBBox.p[1];
+  }
+  tBBox=BoundingBox3D(pList,sNum*2);
 
-  this->bBox = groupBox;
-  return this->bBox;
+  delete[] pList;
+  bBox=tBBox.transform(getMatrix());
+  return bBox;
 }
 
 int StaticRayGroup::set(void){
@@ -75,7 +77,10 @@ int RayGroup::getOpenGLCallList(void){
 }
 
 int RayGroup::drawOpenGL(int materialIndex){
-	return -1;
+  for(int i = 0; i < this->sNum; i++)
+    {
+      this->shapes[i]->drawOpenGL(0);
+    }
 }
 
 /////////////////////
